@@ -85,8 +85,6 @@ static void Error_Handler(void);
   * @param  None
   * @retval None
   */
-	
-
 int main(void)
 {
 
@@ -106,10 +104,8 @@ int main(void)
   SystemCoreClockUpdate();
 
   /* Add your application code here
-  */
-	
-	
-	
+     */
+
 #ifdef RTE_CMSIS_RTOS2
   /* Initialize CMSIS-RTOS2 */
   osKernelInitialize ();
@@ -121,15 +117,10 @@ int main(void)
   osKernelStart();
 #endif
 
- 
- /* Infinite loop */
- while (1)
- {
- }
- 	
-	
-	
-	
+  /* Infinite loop */
+  while (1)
+  {
+  }
 }
 
 /**
@@ -142,8 +133,8 @@ int main(void)
   *            APB1 Prescaler                 = 4
   *            APB2 Prescaler                 = 2
   *            HSE Frequency(Hz)              = 8000000
-  *            PLL_M                          = 4
-  *            PLL_N                          = 168
+  *            PLL_M                          = 25
+  *            PLL_N                          = 336
   *            PLL_P                          = 2
   *            PLL_Q                          = 7
   *            VDD(V)                         = 3.3
@@ -159,7 +150,6 @@ static void SystemClock_Config(void)
 
   /* Enable Power Control clock */
   __HAL_RCC_PWR_CLK_ENABLE();
-  
 
   /* The voltage scaling allows optimizing the power consumption when the device is 
      clocked below the maximum system frequency, to update the voltage scaling value 
@@ -171,10 +161,10 @@ static void SystemClock_Config(void)
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLM = 4;
-  RCC_OscInitStruct.PLL.PLLN = 96;
+  RCC_OscInitStruct.PLL.PLLM = 25;
+  RCC_OscInitStruct.PLL.PLLN = 336;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-  RCC_OscInitStruct.PLL.PLLQ = 2;
+  RCC_OscInitStruct.PLL.PLLQ = 7;
   if(HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     /* Initialization Error */
