@@ -77,7 +77,6 @@ HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority) {
 /* Private function prototypes -----------------------------------------------*/
 static void SystemClock_Config(void);
 static void Error_Handler(void);
-volatile uint8_t estado_frecuencia = 0;
 
 /* Private functions ---------------------------------------------------------*/
 
@@ -86,8 +85,6 @@ volatile uint8_t estado_frecuencia = 0;
   * @param  None
   * @retval None
   */
-	
-
 int main(void)
 {
 
@@ -107,36 +104,8 @@ int main(void)
   SystemCoreClockUpdate();
 
   /* Add your application code here
-  */
-	GPIO_InitTypeDef GPIO_InitStruct={0};
-	
-	//Activar reloj del GPIOB
-	__HAL_RCC_GPIOB_CLK_ENABLE();
-	
-	//Configurar los LEDs como salida
-	GPIO_InitStruct.Pin= GPIO_PIN_0 | GPIO_PIN_7 |GPIO_PIN_14;
-	GPIO_InitStruct.Mode=GPIO_MODE_OUTPUT_PP;
-	GPIO_InitStruct.Pull=GPIO_NOPULL;
-	GPIO_InitStruct.Speed=GPIO_SPEED_FREQ_LOW;
-	HAL_GPIO_Init(GPIOA,&GPIO_InitStruct);
-	
-	//Apagar los LEDS
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0 | GPIO_PIN_7 | GPIO_PIN_14, GPIO_PIN_RESET);
-	
-	//Activar reloj GPIOC
-	__HAL_RCC_GPIOC_CLK_ENABLE();
-	
-	//Configurar el boton como entrada
-	GPIO_InitStruct.Pin=GPIO_PIN_13;
-	GPIO_InitStruct.Mode=GPIO_MODE_IT_RISING;
-	GPIO_InitStruct.Pull=GPIO_NOPULL;
-	HAL_GPIO_Init(GPIOC,&GPIO_InitStruct);
-	HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
-	
-	uint32_t retardo_base = 500; 
-  uint32_t contador_ciclos = 0;
-	
-	
+     */
+
 #ifdef RTE_CMSIS_RTOS2
   /* Initialize CMSIS-RTOS2 */
   osKernelInitialize ();
@@ -148,60 +117,10 @@ int main(void)
   osKernelStart();
 #endif
 
- 
- /* Infinite loop */
- while (1)
- {
-	 if (estado_frecuencia == 0) {
-          retardo_base = 500;
-      }
-      // LD1 a 2Hz significa que cambia cada 250ms
-      else if (estado_frecuencia == 1) {
-          retardo_base = 250;
-      }
-      // LD1 a 4Hz significa que cambia cada 125ms
-      else if (estado_frecuencia == 2) {
-          retardo_base = 125;
-      }
-
-      // 2. APLICAR EL RETARDO
-      HAL_Delay(retardo_base);
-
-      // 3. ACTUALIZAR EL CONTADOR
-      contador_ciclos = contador_ciclos + 1;
-
-      // 4. CAMBIAR EL ESTADO DE LOS LEDS
-      // La función HAL_GPIO_TogglePin invierte el estado actual del pin (si estaba encendido lo apaga y viceversa)
-      
-      // LD1 (Pin 0) cambia SIEMPRE, en cada ciclo base.
-      HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0); 
-
-      // LD2 (Pin 7) va a la mitad de frecuencia. Cambia cada 2 ciclos de LD1.
-      // Usamos el operador módulo (%) que nos da el resto de una división.
-      if (contador_ciclos % 2 == 0) {
-          HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_7);
-      }
-
-      // LD3 (Pin 14) va a la cuarta parte. Cambia cada 4 ciclos de LD1.
-      if (contador_ciclos % 4 == 0) {
-          HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
-      }
- }
- 	
-	
-	
-	
-}
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) 
-{
-    if (GPIO_Pin == GPIO_PIN_13) 
-    {
-        estado_frecuencia = estado_frecuencia + 1;
-        if (estado_frecuencia > 2) 
-        {
-            estado_frecuencia = 0;
-        }
-    }
+  /* Infinite loop */
+  while (1)
+  {
+  }
 }
 
 /**
@@ -214,8 +133,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   *            APB1 Prescaler                 = 4
   *            APB2 Prescaler                 = 2
   *            HSE Frequency(Hz)              = 8000000
-  *            PLL_M                          = 4
-  *            PLL_N                          = 168
+  *            PLL_M                          = 25
+  *            PLL_N                          = 336
   *            PLL_P                          = 2
   *            PLL_Q                          = 7
   *            VDD(V)                         = 3.3
@@ -231,7 +150,6 @@ static void SystemClock_Config(void)
 
   /* Enable Power Control clock */
   __HAL_RCC_PWR_CLK_ENABLE();
-  
 
   /* The voltage scaling allows optimizing the power consumption when the device is 
      clocked below the maximum system frequency, to update the voltage scaling value 
@@ -243,10 +161,10 @@ static void SystemClock_Config(void)
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLM = 4;
-  RCC_OscInitStruct.PLL.PLLN = 96;
+  RCC_OscInitStruct.PLL.PLLM = 25;
+  RCC_OscInitStruct.PLL.PLLN = 336;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-  RCC_OscInitStruct.PLL.PLLQ = 2;
+  RCC_OscInitStruct.PLL.PLLQ = 7;
   if(HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     /* Initialization Error */
