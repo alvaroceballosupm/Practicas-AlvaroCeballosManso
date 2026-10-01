@@ -77,6 +77,7 @@ HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority) {
 /* Private function prototypes -----------------------------------------------*/
 static void SystemClock_Config(void);
 static void Error_Handler(void);
+volatile uint8_t estado_frecuencia = 0;
 
 /* Private functions ---------------------------------------------------------*/
 
@@ -107,7 +108,33 @@ int main(void)
 
   /* Add your application code here
   */
+	GPIO_InitTypeDef GPIO_InitStruct={0};
 	
+	//Activar reloj del GPIOB
+	__HAL_RCC_GPIOB_CLK_ENABLE();
+	
+	//Configurar los LEDs como salida
+	GPIO_InitStruct.Pin= GPIO_PIN_0 | GPIO_PIN_7 |GPIO_PIN_14;
+	GPIO_InitStruct.Mode=GPIO_MODE_OUTPUT_PP;
+	GPIO_InitStruct.Pull=GPIO_NOPULL;
+	GPIO_InitStruct.Speed=GPIO_SPEED_FREQ_LOW;
+	HAL_GPIO_Init(GPIOA,&GPIO_InitStruct);
+	
+	//Apagar los LEDS
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0 | GPIO_PIN_7 | GPIO_PIN_14, GPIO_PIN_RESET);
+	
+	//Activar reloj GPIOC
+	__HAL_RCC_GPIOC_CLK_ENABLE();
+	
+	//Configurar el boton como entrada
+	GPIO_InitStruct.Pin=GPIO_PIN_13;
+	GPIO_InitStruct.Mode=GPIO_MODE_IT_RISING;
+	GPIO_InitStruct.Pull=GPIO_NOPULL;
+	HAL_GPIO_Init(GPIOC,&GPIO_InitStruct);
+	HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+	
+	uint32_t retardo_base = 500; 
+  uint32_t contador_ciclos = 0;
 	
 #ifdef RTE_CMSIS_RTOS2
   /* Initialize CMSIS-RTOS2 */
@@ -124,11 +151,56 @@ int main(void)
  /* Infinite loop */
  while (1)
  {
+	 if (estado_frecuencia == 0) {
+          retardo_base = 500;
+      }
+      // LD1 a 2Hz significa que cambia cada 250ms
+      else if (estado_frecuencia == 1) {
+          retardo_base = 250;
+      }
+      // LD1 a 4Hz significa que cambia cada 125ms
+      else if (estado_frecuencia == 2) {
+          retardo_base = 125;
+      }
+
+      // 2. APLICAR EL RETARDO
+      HAL_Delay(retardo_base);
+
+      // 3. ACTUALIZAR EL CONTADOR
+      contador_ciclos = contador_ciclos + 1;
+
+      // 4. CAMBIAR EL ESTADO DE LOS LEDS
+      // La función HAL_GPIO_TogglePin invierte el estado actual del pin (si estaba encendido lo apaga y viceversa)
+      
+      // LD1 (Pin 0) cambia SIEMPRE, en cada ciclo base.
+      HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0); 
+
+      // LD2 (Pin 7) va a la mitad de frecuencia. Cambia cada 2 ciclos de LD1.
+      // Usamos el operador módulo (%) que nos da el resto de una división.
+      if (contador_ciclos % 2 == 0) {
+          HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_7);
+      }
+
+      // LD3 (Pin 14) va a la cuarta parte. Cambia cada 4 ciclos de LD1.
+      if (contador_ciclos % 4 == 0) {
+          HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
+      }
  }
  	
 	
 	
 	
+}
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) 
+{
+    if (GPIO_Pin == GPIO_PIN_13) 
+    {
+        estado_frecuencia = estado_frecuencia + 1;
+        if (estado_frecuencia > 2) 
+        {
+            estado_frecuencia = 0;
+        }
+    }
 }
 
 /**
