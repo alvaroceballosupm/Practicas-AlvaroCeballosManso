@@ -111,17 +111,17 @@ int main(void)
 	GPIO_InitTypeDef GPIO_InitStruct={0};
 	
 	//Activar reloj del GPIOB
-	__HAL_RCC_GPIOB_CLK_ENABLE();
+	__HAL_RCC_GPIOD_CLK_ENABLE();
 	
 	//Configurar los LEDs como salida
-	GPIO_InitStruct.Pin= GPIO_PIN_0 | GPIO_PIN_7 |GPIO_PIN_14;
+	GPIO_InitStruct.Pin= GPIO_PIN_13 | GPIO_PIN_12 |GPIO_PIN_11;
 	GPIO_InitStruct.Mode=GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Pull=GPIO_NOPULL;
 	GPIO_InitStruct.Speed=GPIO_SPEED_FREQ_LOW;
-	HAL_GPIO_Init(GPIOA,&GPIO_InitStruct);
+	HAL_GPIO_Init(GPIOD,&GPIO_InitStruct);
 	
 	//Apagar los LEDS
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0 | GPIO_PIN_7 | GPIO_PIN_14, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13 | GPIO_PIN_12 | GPIO_PIN_11, GPIO_PIN_RESET);
 	
 	//Activar reloj GPIOC
 	__HAL_RCC_GPIOC_CLK_ENABLE();
@@ -174,17 +174,17 @@ int main(void)
       // La función HAL_GPIO_TogglePin invierte el estado actual del pin (si estaba encendido lo apaga y viceversa)
       
       // LD1 (Pin 0) cambia SIEMPRE, en cada ciclo base.
-      HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0); 
+      HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_13); 
 
       // LD2 (Pin 7) va a la mitad de frecuencia. Cambia cada 2 ciclos de LD1.
       // Usamos el operador módulo (%) que nos da el resto de una división.
       if (contador_ciclos % 2 == 0) {
-          HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_7);
+          HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_12);
       }
 
       // LD3 (Pin 14) va a la cuarta parte. Cambia cada 4 ciclos de LD1.
       if (contador_ciclos % 4 == 0) {
-          HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_14);
+          HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_11);
       }
  }
  	
